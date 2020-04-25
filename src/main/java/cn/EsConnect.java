@@ -1,23 +1,19 @@
 package cn;
 
 import org.apache.http.HttpHost;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
-import org.apache.http.impl.nio.reactor.IOReactorConfig;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestClientBuilder;
-import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.client.*;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.TransportAddress;
+import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
 /**
@@ -28,12 +24,10 @@ public class EsConnect {
 
     private RestHighLevelClient client;
     public EsConnect() {
-        RestHighLevelClient client = new RestHighLevelClient(
+        client = new RestHighLevelClient(
                 RestClient.builder(
-                        //集群节点
-//                        new HttpHost("localhost", 9200, "http"),
-                        new HttpHost("localhost", 9200, "http")));
-        this.client = client;
+                        new HttpHost("localhost", 9200, "http"))
+        );
     }
 
     public void shutdown(){
@@ -67,5 +61,16 @@ public class EsConnect {
         EsConnect connect = new EsConnect();
         connect.test();
         connect.shutdown();
+    }
+
+    public void createIndex() throws Exception {
+        IndexRequest request = new IndexRequest("posts");
+        request.id("1");
+        String jsonString = "{" +
+                "\"user\":\"kimchy\"," +
+                "\"postDate\":\"2013-01-30\"," +
+                "\"message\":\"trying out Elasticsearch\"" +
+                "}";
+        request.source(jsonString, XContentType.JSON);
     }
 }
